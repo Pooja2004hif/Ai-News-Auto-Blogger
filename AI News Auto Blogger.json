@@ -1,0 +1,194 @@
+{
+  "name": "AI News Auto Blogger",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b0a7c801-5aab-4801-bc35-2d26e58e0afb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search.json?q=Artificial+Intelligence&tbm=nws&api_key=56a21b83491c5203bc8f9129ba1e061e6c9dcbed14a4cca2444b5a7e6c872b25",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b89a9d10-33df-4197-aa2c-b57ca16ebda6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const articles = $json.news_results;\n\nreturn articles.map(article => {\n  return {\n    json: {\n      title: article.title,\n      snippet: article.snippet,\n      link: article.link\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "9dca6304-3012-4a6b-9936-bbac9e4328e8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a professional AI blog article from this news:\\nTitle: {{$json.title}}\\nDescription: {{$json.snippet}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        144,
+        144
+      ],
+      "id": "fb30537a-de8b-4532-80a3-20ec9036a837",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "sendTo": "poojapallavi362@gmail.com",
+        "subject": "Daily AI News Blog",
+        "emailType": "text",
+        "message": "={{$json[\"choices\"][0][\"message\"][\"content\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        112
+      ],
+      "id": "caa41742-fe8a-4587-b012-dd14b72f5df4",
+      "name": "Send a message1",
+      "webhookId": "e8db8c4b-89bc-416e-ab5c-6c24605a9e2e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vkhVUJulAHUH1zZq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a professional AI blog article from this news:\\nTitle: {{$json.title}}\\nDescription: {{$json.snippet}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        352,
+        0
+      ],
+      "id": "a917ff22-ecaf-471f-9d2c-2d7b0e12ca7b",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c3a94572-86f4-4290-bb6f-175a5704fa12",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39b85b862147c97e525b18d951956da0f90f83705dd86642cb562adea40d8322"
+  },
+  "id": "5b2gnYKNqrZHDOeP",
+  "tags": []
+}
